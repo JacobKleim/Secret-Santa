@@ -7,7 +7,7 @@ def main():
     load_dotenv()
     token = os.environ["TG_TOKEN"]
     bot = telegram.Bot(token=token)
-    chat_id = 275657147
+    chat_id = os.environ["TG_CHAT"]
     message_text = 'Привет! Это тестовое сообщение от бота.'
     bot.send_message(chat_id=chat_id, text=message_text)
 
