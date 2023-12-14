@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Player(models.Model):
     tg_id = models.CharField(max_length=50, primary_key=True)
     login = models.CharField(max_length=50)
@@ -11,6 +12,7 @@ class Player(models.Model):
     wishes = models.TextField()
     game_id = models.ForeignKey('Game', on_delete=models.CASCADE)
 
+
 class Game(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
     owner = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='owned_games', blank=True, null=True)
@@ -19,6 +21,7 @@ class Game(models.Model):
     budget = models.CharField(max_length=50, blank=True, null=True)
     draw_date = models.DateTimeField(blank=True, null=True)
     send_date = models.DateTimeField(blank=True, null=True)
+
 
 class DrawingResult(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE, blank=True, null=True)
