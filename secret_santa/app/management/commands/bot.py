@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Command(BaseCommand):
     help = 'Starts the Telegram bot'
 
@@ -19,6 +20,9 @@ class Command(BaseCommand):
         logger.info('Bot started')
 
         def start(update, context):
+            game_id = update.message.text.split(' ')[1] if len(update.message.text.split(' ')) > 1 else None
+            if game_id:
+                return register_user(update, context, game_id)
             keyboard = [
                 [InlineKeyboardButton("Создать игру", callback_data='Создать игру')],
             ]
@@ -99,11 +103,64 @@ class Command(BaseCommand):
                 print(f"Response from Django: {response.text}")
 
                 data_from_db = response.json()
-                print('----------')
+                print('-----Created game data-----')
                 print(data_from_db)
                 print('----------')
 
-                update.message.reply_text(f'Игра {data_from_db["name"]} создана! Ссылка на игру: https://t.me/sssssssssannnttaaaa_bot/start={data_from_db["id"]}')
+                update.message.reply_text(f'Игра {data_from_db["name"]} создана! Ссылка на игру: https://t.me/sssssssssannnttaaaa_bot?start={data_from_db["id"]}')
+                return ConversationHandler.END
+            except Exception as e:
+                print(f"Error in create_game function: {e}")
+                return ConversationHandler.END
+        
+        def register_user(update, context, game_id):
+            context.user_data['game_id'] = game_id
+            update.message.reply_text("Давайте начнем регистрацию. Пожалуйста, введите ваше имя:")
+            return 'GET_NAME'
+
+        def get_name(update, context):
+            context.user_data['name'] = update.message.text
+            update.message.reply_text("Теперь введите вашу фамилию:")
+            return 'GET_LAST_NAME'
+
+        def get_last_name(update, context):
+            context.user_data['last_name'] = update.message.text
+            update.message.reply_text("Поделитесь вашим номером телефона:")
+            return 'GET_PHONE_NUMBER'
+
+        def get_phone_number(update, context):
+            context.user_data['phone'] = update.message.contact.phone_number if update.message.contact else update.message.text
+            update.message.reply_text("Что бы вы хотели получить в подарок?")
+            return 'GET_WISHES'
+
+        def get_wishes(update, context):
+            context.user_data['wishes'] = update.message.text
+            return 'CREATE_USER'
+
+        def create_user(update, context):
+            context.chat_data['game_info']['draw_date'] = update.message.text
+            game_info = context.chat_data['game_info']
+            try:
+                django_view_url = f'http://127.0.0.1:8000/create_user/'
+                print(game_info)
+                response = requests.post(django_view_url, json={
+                    'owner': game_info['owner'],
+                    'name': game_info['name'],
+                    'is_limited': game_info['is_limited'],
+                    'budget': game_info['budget'],
+                    'draw_date': game_info['draw_date']
+                    }
+                )
+
+                print(f"Sent POST request to Django for creating game: {game_info}")
+                print(f"Response from Django: {response.text}")
+
+                data_from_db = response.json()
+                print('-----Created game data-----')
+                print(data_from_db)
+                print('----------')
+
+                update.message.reply_text(f'Игра {data_from_db["name"]} создана! Ссылка на игру: https://t.me/sssssssssannnttaaaa_bot?start={data_from_db["id"]}')
                 return ConversationHandler.END
             except Exception as e:
                 print(f"Error in create_game function: {e}")
@@ -121,6 +178,11 @@ class Command(BaseCommand):
                 'REGISTRATION_DATE': [MessageHandler(Filters.text & ~Filters.command, get_registration_date)],
                 'CREATE_GAME': [MessageHandler(Filters.text & ~Filters.command, create_game)],
                 'ERROR': [MessageHandler(Filters.text & ~Filters.command, print_error_message)],
+                'GET_NAME': [MessageHandler(Filters.text & ~Filters.command, get_name)],
+                'GET_LAST_NAME': [MessageHandler(Filters.text & ~Filters.command, get_last_name)],
+                'GET_PHONE_NUMBER': [MessageHandler(Filters.text & ~Filters.command, get_phone_number)],
+                'GET_WISHES': [MessageHandler(Filters.text & ~Filters.command, get_wishes)],
+                'CREATE_USER': [MessageHandler(Filters.text & ~Filters.command, create_user)],   
             },
             fallbacks=[],
         )
