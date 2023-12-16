@@ -8,7 +8,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMa
 from dotenv import load_dotenv
 
 load_dotenv()
-
+# TODO REGISTER USER THROUGH VIEW, ADD SCHEDULER, ADD RASSILKI
 
 class Command(BaseCommand):
     help = 'Starts the Telegram bot'
@@ -22,6 +22,7 @@ class Command(BaseCommand):
         def start(update, context):
             game_id = update.message.text.split(' ')[1] if len(update.message.text.split(' ')) > 1 else None
             if game_id:
+                context.user_data['user_tg_id'] = update.message.from_user['id']
                 return register_user(update, context, game_id)
             keyboard = [
                 [InlineKeyboardButton("Создать игру", callback_data='Создать игру')],
@@ -60,7 +61,7 @@ class Command(BaseCommand):
             reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
             update.message.reply_text('Бюджет ограничен?', reply_markup=reply_markup)
             return 'CHOOSE_BUDGET'
-            
+
         def choose_budget(update, context):
             if update.message.text == "Да":
                 context.chat_data['game_info']['is_limited'] = True
@@ -68,19 +69,19 @@ class Command(BaseCommand):
                     ['до 500', '500-1000', '1000-2000']
                 ]
                 reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-                update.message.reply_text('Выберите бюджет:', reply_markup=reply_markup)         
+                update.message.reply_text('Выберите бюджет:', reply_markup=reply_markup)
                 return 'REGISTRATION_DATE'
             context.chat_data['game_info']['is_limited'] = False
-            context.chat_data['game_info']['budget'] = ''            
-            update.message.reply_text('Введите дату завершения регистрации (в формате ММ/ДД/ГГГГ):')         
+            context.chat_data['game_info']['budget'] = ''
+            update.message.reply_text('Введите дату завершения регистрации (в формате ММ/ДД/ГГГГ HH:MM):')
             return 'CREATE_GAME'
 
 
         def get_registration_date(update, context):
             context.chat_data['game_info']['budget'] = update.message.text
-            update.message.reply_text('Введите дату завершения регистрации (в формате ММ/ДД/ГГГГ):')
+            update.message.reply_text('Введите дату завершения регистрации (в формате ММ/ДД/ГГГГ HH:MM):')
             return 'CREATE_GAME'
-        
+
         def print_error_message(update, context):
             update.message.reply_text('Что-то пошло не так. Попробуйте ещё раз.')
 
@@ -112,7 +113,7 @@ class Command(BaseCommand):
             except Exception as e:
                 print(f"Error in create_game function: {e}")
                 return ConversationHandler.END
-        
+
         def register_user(update, context, game_id):
             context.user_data['game_id'] = game_id
             update.message.reply_text("Давайте начнем регистрацию. Пожалуйста, введите ваше имя:")
@@ -131,36 +132,34 @@ class Command(BaseCommand):
         def get_phone_number(update, context):
             context.user_data['phone'] = update.message.contact.phone_number if update.message.contact else update.message.text
             update.message.reply_text("Что бы вы хотели получить в подарок?")
-            return 'GET_WISHES'
-
-        def get_wishes(update, context):
-            context.user_data['wishes'] = update.message.text
             return 'CREATE_USER'
 
+
         def create_user(update, context):
-            context.chat_data['game_info']['draw_date'] = update.message.text
-            game_info = context.chat_data['game_info']
+            context.user_data['wishes'] = update.message.text
+            user_info = context.user_data
+            print(user_info)
             try:
                 django_view_url = f'http://127.0.0.1:8000/create_user/'
-                print(game_info)
                 response = requests.post(django_view_url, json={
-                    'owner': game_info['owner'],
-                    'name': game_info['name'],
-                    'is_limited': game_info['is_limited'],
-                    'budget': game_info['budget'],
-                    'draw_date': game_info['draw_date']
+                    'tg_id': user_info['user_tg_id'],
+                    'first_name': user_info['name'],
+                    'last_name': user_info['last_name'],
+                    'phone': user_info['phone'],
+                    'is_admin': False,
+                    'wishes': user_info['wishes']
                     }
                 )
 
-                print(f"Sent POST request to Django for creating game: {game_info}")
+                print(f"Sent POST request to Django for creating user: {user_info}")
                 print(f"Response from Django: {response.text}")
 
                 data_from_db = response.json()
-                print('-----Created game data-----')
+                print('-----Created player data-----')
                 print(data_from_db)
                 print('----------')
 
-                update.message.reply_text(f'Игра {data_from_db["name"]} создана! Ссылка на игру: https://t.me/sssssssssannnttaaaa_bot?start={data_from_db["id"]}')
+                update.message.reply_text(f'Вы успешно зарегистрировались в игре!')
                 return ConversationHandler.END
             except Exception as e:
                 print(f"Error in create_game function: {e}")
@@ -181,8 +180,8 @@ class Command(BaseCommand):
                 'GET_NAME': [MessageHandler(Filters.text & ~Filters.command, get_name)],
                 'GET_LAST_NAME': [MessageHandler(Filters.text & ~Filters.command, get_last_name)],
                 'GET_PHONE_NUMBER': [MessageHandler(Filters.text & ~Filters.command, get_phone_number)],
-                'GET_WISHES': [MessageHandler(Filters.text & ~Filters.command, get_wishes)],
-                'CREATE_USER': [MessageHandler(Filters.text & ~Filters.command, create_user)],   
+                #'GET_WISHES': [MessageHandler(Filters.text & ~Filters.command, get_wishes)],
+                'CREATE_USER': [MessageHandler(Filters.text & ~Filters.command, create_user)],
             },
             fallbacks=[],
         )
