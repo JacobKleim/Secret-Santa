@@ -7,11 +7,9 @@ class Player(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     phone = models.CharField(max_length=20)
-    email = models.EmailField()
+    email = models.EmailField(null=True)
     is_admin = models.BooleanField(default=False)
     wishes = models.TextField()
-    game_id = models.ForeignKey('Game', on_delete=models.CASCADE)
-
 
 class Game(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -20,6 +18,7 @@ class Game(models.Model):
     is_limited = models.BooleanField(default=False, blank=True, null=True)
     budget = models.CharField(max_length=50, blank=True, null=True)
     draw_date = models.DateTimeField(blank=True, null=True)
+    is_drawn = models.BooleanField(default=False, blank=True, null=True)
     send_date = models.DateTimeField(blank=True, null=True)
 
 
