@@ -6,7 +6,10 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler,
                           Filters, ConversationHandler, CallbackQueryHandler)
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from dotenv import load_dotenv
+from app.models import Player
 
+admin_players = Player.objects.filter(is_admin=True).values_list('tg_id')
+WHITELIST = [int(tg_id) for tg_id, in admin_players]
 load_dotenv()
 # TODO REGISTER USER THROUGH VIEW, ADD SCHEDULER, ADD RASSILKI
 
@@ -24,14 +27,17 @@ class Command(BaseCommand):
             if game_id:
                 context.user_data['user_tg_id'] = update.message.from_user['id']
                 return register_user(update, context, game_id)
-            keyboard = [
-                [InlineKeyboardButton("Создать игру", callback_data='Создать игру')],
-            ]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-            update.message.reply_text('Организуй тайный обмен подарками, запусти праздничное настроение!',
-                                      reply_markup=reply_markup)
-
-            return 'GET_GAME_NAME'
+            else:
+                if update.message.from_user['id'] in WHITELIST:
+                    keyboard = [
+                        [InlineKeyboardButton("Создать игру", callback_data='Создать игру')],
+                    ]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                    update.message.reply_text('Организуй тайный обмен подарками, запусти праздничное настроение!',
+                                            reply_markup=reply_markup)
+                    return 'GET_GAME_NAME'
+                else:
+                    update.message.reply_text('Вы не организатор! Перейдите по ссылке и зарегистрируйтесь как игрок!')
 
         def get_game_name(update, context):
             context.chat_data['game_info'] = {}
