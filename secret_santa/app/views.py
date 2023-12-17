@@ -6,7 +6,6 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from app.forms import Registration_Form
-
 from app.models import Game, Player
 
 
