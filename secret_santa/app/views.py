@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import make_aware
 
 from app.forms import Registration_Form
 from app.models import Game, Player
@@ -14,8 +15,9 @@ def create_game(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
+            draw_date = make_aware(datetime.strptime(data.get('draw_date'), '%m/%d/%Y %H:%M'))
+
             game_name = data.get('game_name')
-            draw_date = datetime.strptime(data.get('draw_date'), '%m/%d/%Y')
 
             send_date = draw_date + timedelta(days=3)
             response_data = {'status': 'success',
@@ -37,6 +39,38 @@ def create_game(request):
                 'budget': created_game.budget,
                 'draw_date': created_game.draw_date
             }
+            return JsonResponse(response_data)
+        except json.decoder.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON format in the request'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+
+@csrf_exempt
+def create_user(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            print(data)
+            Player.objects.create(
+                first_name=data.get('first_name'),
+                last_name=data.get('last_name'),
+                tg_id=data.get('tg_id'),                
+                phone=data.get('phone'),
+                is_admin=data.get('is_admin'),
+                wishes=data.get('wishes'),
+                game=Game.objects.get(pk=int(data.get('game')))
+            )
+            created_user = Player.objects.last()
+            response_data = {
+                'status': 'success',
+                'tg_id': created_user.tg_id,
+                'first_name': created_user.first_name,
+                'last_name': created_user.last_name,
+                'phone': created_user.phone,
+                'wishes': created_user.wishes
+            }
+            
             return JsonResponse(response_data)
         except json.decoder.JSONDecodeError:
             return JsonResponse(
