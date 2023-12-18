@@ -4,7 +4,7 @@
 Телеграм-бот для организации обмена подарками, написанный на Python с использованием библиотеки python-telegram-bot.
 Бот позволяет пользователям создавать игру "Тайный Санта" и управлять ей через удобный интерфейс Telegram.
 
-#### Использованные технологии:
+## Использованные технологии:
 ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
 
 ![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)
@@ -16,17 +16,11 @@
 ![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)
 
 
-![License](https://img.shields.io/github/license/JacobKleim/Secret-Santa) 
-
 ## Установка проекта
 
 Обновите менеджер пакетов Python до последней версии:
 ```python
 python -m pip install --upgrade pip
-```
-Примените миграции в Django:
-```python
-python manage.py migrate
 ```
 Откройте терминал и создайте виртуальное окружение:
 ```python
@@ -47,8 +41,11 @@ TELEGRAM_BOT_TOKEN ="телеграм_токен_бота"
 ```python
 pip install -r requirements.txt
 ```
+Примените миграции в Django:
+```python
+python manage.py migrate
+```
 ## Запуск проекта
-
 
 Для запуска проекта выполните следующую команду:
 ```python
