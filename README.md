@@ -34,7 +34,6 @@ python manage.py runserver
 ```python
 python manage.py bot
 ```
-
 ## Работа с ботом
 
 Для начала игры необходимо открыть диалог с [ботом](https://t.me/SantsSecretSants_bot).
