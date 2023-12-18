@@ -1,12 +1,15 @@
-import os
-import requests
 import logging
+import os
+
+import requests
+from app.models import Game, Player
 from django.core.management.base import BaseCommand
-from telegram.ext import (Updater, CommandHandler, MessageHandler,
-                          Filters, ConversationHandler, CallbackQueryHandler)
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from dotenv import load_dotenv
-from app.models import Player
+from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
+                      ReplyKeyboardMarkup)
+from telegram.ext import (CallbackQueryHandler, CommandHandler,
+                          ConversationHandler, Filters, MessageHandler,
+                          Updater)
 
 admin_players = Player.objects.filter(is_admin=True).values_list('tg_id')
 WHITELIST = [int(tg_id) for tg_id, in admin_players]
@@ -18,7 +21,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         bot_token = os.environ['TELEGRAM_BOT_TOKEN']
-        logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+        logging.basicConfig(
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            level=logging.DEBUG)
         logger = logging.getLogger(__name__)
         logger.info('Bot started')
 
@@ -64,8 +69,10 @@ class Command(BaseCommand):
             keyboard = [
                 ['Да', 'Нет']
             ]
-            reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-            update.message.reply_text('Бюджет ограничен?', reply_markup=reply_markup)
+            reply_markup = ReplyKeyboardMarkup(keyboard,
+                                               one_time_keyboard=True)
+            update.message.reply_text('Бюджет ограничен?',
+                                      reply_markup=reply_markup)
             return 'CHOOSE_BUDGET'
 
         def choose_budget(update, context):
@@ -75,7 +82,8 @@ class Command(BaseCommand):
                     ['до 500', '500-1000', '1000-2000']
                 ]
                 reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
-                update.message.reply_text('Выберите бюджет:', reply_markup=reply_markup)
+                update.message.reply_text('Выберите бюджет:', 
+                                          reply_markup=reply_markup)
                 return 'REGISTRATION_DATE'
             context.chat_data['game_info']['is_limited'] = False
             context.chat_data['game_info']['budget'] = ''
@@ -167,6 +175,7 @@ class Command(BaseCommand):
 
                 update.message.reply_text(f'Вы успешно зарегистрировались в игре!')
                 return ConversationHandler.END
+
             except Exception as e:
                 print(f"Error in create_game function: {e}")
                 return ConversationHandler.END
