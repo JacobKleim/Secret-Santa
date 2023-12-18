@@ -11,11 +11,8 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
                           ConversationHandler, Filters, MessageHandler,
                           Updater)
 
-admin_players = Player.objects.filter(is_admin=True).values_list('tg_id')
-WHITELIST = [int(tg_id) for tg_id, in admin_players]
-load_dotenv()
-# TODO REGISTER USER THROUGH VIEW, ADD SCHEDULER, ADD RASSILKI
 
+load_dotenv()
 class Command(BaseCommand):
     help = 'Starts the Telegram bot'
 
@@ -28,9 +25,12 @@ class Command(BaseCommand):
         logger.info('Bot started')
 
         def start(update, context):
+            admin_players = Player.objects.filter(is_admin=True).values_list('tg_id')
+            WHITELIST = [int(tg_id) for tg_id, in admin_players]
             game_id = update.message.text.split(' ')[1] if len(update.message.text.split(' ')) > 1 else None
             if game_id:
                 context.user_data['user_tg_id'] = update.message.from_user['id']
+                context.user_data['game_id'] = game_id
                 return register_user(update, context, game_id)
             else:
                 if update.message.from_user['id'] in WHITELIST:
@@ -90,7 +90,6 @@ class Command(BaseCommand):
             update.message.reply_text('Введите дату завершения регистрации (в формате ММ/ДД/ГГГГ HH:MM):')
             return 'CREATE_GAME'
 
-
         def get_registration_date(update, context):
             context.chat_data['game_info']['budget'] = update.message.text
             update.message.reply_text('Введите дату завершения регистрации (в формате ММ/ДД/ГГГГ HH:MM):')
@@ -147,7 +146,7 @@ class Command(BaseCommand):
             context.user_data['phone'] = update.message.contact.phone_number if update.message.contact else update.message.text
             update.message.reply_text("Что бы вы хотели получить в подарок?")
             return 'CREATE_USER'
-
+        
 
         def create_user(update, context):
             context.user_data['wishes'] = update.message.text
@@ -156,15 +155,15 @@ class Command(BaseCommand):
             try:
                 django_view_url = f'http://127.0.0.1:8000/create_user/'
                 response = requests.post(django_view_url, json={
-                    'tg_id': user_info['user_tg_id'],
+                    'tg_id': str(user_info['user_tg_id']),
                     'first_name': user_info['name'],
                     'last_name': user_info['last_name'],
                     'phone': user_info['phone'],
                     'is_admin': False,
-                    'wishes': user_info['wishes']
+                    'wishes': user_info['wishes'],
+                    'game': user_info['game_id']
                     }
                 )
-
                 print(f"Sent POST request to Django for creating user: {user_info}")
                 print(f"Response from Django: {response.text}")
 

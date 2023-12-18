@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.timezone import make_aware
 
 from app.forms import Registration_Form
 from app.models import Game, Player
@@ -50,14 +51,15 @@ def create_user(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
-
+            print(data)
             Player.objects.create(
-                tg_id=data.get('tg_id'),
                 first_name=data.get('first_name'),
                 last_name=data.get('last_name'),
+                tg_id=data.get('tg_id'),                
                 phone=data.get('phone'),
                 is_admin=data.get('is_admin'),
                 wishes=data.get('wishes'),
+                game=Game.objects.get(pk=int(data.get('game')))
             )
             created_user = Player.objects.last()
             response_data = {
@@ -68,6 +70,7 @@ def create_user(request):
                 'phone': created_user.phone,
                 'wishes': created_user.wishes
             }
+            
             return JsonResponse(response_data)
         except json.decoder.JSONDecodeError:
             return JsonResponse(
