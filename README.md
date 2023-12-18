@@ -12,26 +12,7 @@
 ![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)
 
 
-  <p align="center">
-    <a href="https://github.com/JacobKleim/Secret-Santa"><strong>Explore the docs »</strong></a>
-    <br/>
-    <br/>
-    <a href="https://github.com/JacobKleim/Secret-Santa">View Demo</a>
-    .
-    <a href="https://github.com/JacobKleim/Secret-Santa/issues">Report Bug</a>
-    .
-    <a href="https://github.com/JacobKleim/Secret-Santa/issues">Request Feature</a>
-  </p>
-</p>
-
-![Downloads](https://img.shields.io/github/downloads/JacobKleim/Secret-Santa/total) ![Contributors](https://img.shields.io/github/contributors/JacobKleim/Secret-Santa?color=dark-green) ![Issues](https://img.shields.io/github/issues/JacobKleim/Secret-Santa) ![License](https://img.shields.io/github/license/JacobKleim/Secret-Santa) 
-
-
-* [О проекте](#Secret-Santa)
-* [Установка проекта](#Установка проекта)
-* [Запуск проекта](#Запуск проекта)
-* [Работа с ботом](#Работа с ботом)
-
+![License](https://img.shields.io/github/license/JacobKleim/Secret-Santa) 
 
 ## Установка проекта
 
