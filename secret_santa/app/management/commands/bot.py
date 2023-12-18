@@ -1,8 +1,8 @@
 import logging
 import os
-
 import requests
-from app.models import Game, Player
+
+from app.models import Player
 from django.core.management.base import BaseCommand
 from dotenv import load_dotenv
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup,
@@ -13,6 +13,8 @@ from telegram.ext import (CallbackQueryHandler, CommandHandler,
 
 
 load_dotenv()
+
+
 class Command(BaseCommand):
     help = 'Starts the Telegram bot'
 
@@ -178,10 +180,8 @@ class Command(BaseCommand):
             except Exception as e:
                 print(f"Error in create_game function: {e}")
                 return ConversationHandler.END
-
         updater = Updater(bot_token, use_context=True)
         dispatcher = updater.dispatcher
-
         conv_handler = ConversationHandler(
             entry_points=[CommandHandler("start", start)],
             states={
@@ -194,7 +194,6 @@ class Command(BaseCommand):
                 'GET_NAME': [MessageHandler(Filters.text & ~Filters.command, get_name)],
                 'GET_LAST_NAME': [MessageHandler(Filters.text & ~Filters.command, get_last_name)],
                 'GET_PHONE_NUMBER': [MessageHandler(Filters.text & ~Filters.command, get_phone_number)],
-                #'GET_WISHES': [MessageHandler(Filters.text & ~Filters.command, get_wishes)],
                 'CREATE_USER': [MessageHandler(Filters.text & ~Filters.command, create_user)],
             },
             fallbacks=[],
