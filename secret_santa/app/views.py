@@ -15,7 +15,8 @@ def create_game(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body.decode('utf-8'))
-            draw_date = make_aware(datetime.strptime(data.get('draw_date'), '%m/%d/%Y %H:%M'))
+            draw_date = make_aware(
+                datetime.strptime(data.get('draw_date'), '%m/%d/%Y %H:%M'))
 
             game_name = data.get('game_name')
 
@@ -41,9 +42,12 @@ def create_game(request):
             }
             return JsonResponse(response_data)
         except json.decoder.JSONDecodeError:
-            return JsonResponse({'status': 'error', 'message': 'Invalid JSON format in the request'})
+            return JsonResponse(
+                {'status': 'error',
+                 'message': 'Invalid JSON format in the request'})
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+        return JsonResponse({'status': 'error',
+                             'message': 'Invalid request method'})
 
 
 @csrf_exempt
@@ -55,10 +59,12 @@ def create_user(request):
             Player.objects.create(
                 first_name=data.get('first_name'),
                 last_name=data.get('last_name'),
-                tg_id=data.get('tg_id'),                
+                tg_id=data.get('tg_id'),
                 phone=data.get('phone'),
                 is_admin=data.get('is_admin'),
-                wishes=data.get('wishes')).games.add(Game.objects.get(pk=int(data.get('game')))
+                wishes=data.get('wishes')).games.add(
+                    Game.objects.get(pk=int(data.get('game'))))
+
             created_user = Player.objects.last()
             response_data = {
                 'status': 'success',
@@ -68,7 +74,7 @@ def create_user(request):
                 'phone': created_user.phone,
                 'wishes': created_user.wishes
             }
-            
+
             return JsonResponse(response_data)
         except json.decoder.JSONDecodeError:
             return JsonResponse(
