@@ -9,15 +9,14 @@ class Player(models.Model):
     email = models.EmailField(null=True)
     is_admin = models.BooleanField(default=False, blank=True, null=True)
     wishes = models.TextField('Пожелания', blank=True, null=False, default="Любой подарок")
-    game = models.ForeignKey(
-        'Game',
-        on_delete=models.CASCADE,
-        verbose_name='Игра',
-        null=True)
+    games = models.ManyToManyField(
+    'Game',
+    related_name='players',
+    blank=True)
 
     def __str__(self):
         return (f'{self.first_name} {self.last_name}, '
-                f'email: {self.email}, игра: {self.game}')
+                f'email: {self.email}')
 
 
 class Game(models.Model):
@@ -33,7 +32,6 @@ class Game(models.Model):
         blank=True,
         null=True)
 
-    players = models.ManyToManyField(Player, related_name='games', blank=True)
     is_limited = models.BooleanField(default=False, blank=True, null=True)
     budget = models.CharField(max_length=50, blank=True, null=True)
     draw_date = models.DateTimeField(blank=True, null=True)
