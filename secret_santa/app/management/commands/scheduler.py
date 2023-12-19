@@ -46,7 +46,7 @@ def send_message(sender, recipient, success):
 def perform_lottery():
     games_to_draw = Game.objects.filter(draw_date__lte=timezone.now(), draw_status=False)
     for game in games_to_draw:
-        players = list(Player.objects.filter(game=game))
+        players = list(game.players.all())
         if len(players) < 2:
             send_message(players[0], players[0], False)
         else:
