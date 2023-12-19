@@ -58,9 +58,7 @@ def create_user(request):
                 tg_id=data.get('tg_id'),                
                 phone=data.get('phone'),
                 is_admin=data.get('is_admin'),
-                wishes=data.get('wishes'),
-                game=Game.objects.get(pk=int(data.get('game')))
-            )
+                wishes=data.get('wishes')).games.add(Game.objects.get(pk=int(data.get('game')))
             created_user = Player.objects.last()
             response_data = {
                 'status': 'success',
