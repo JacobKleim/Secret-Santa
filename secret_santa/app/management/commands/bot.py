@@ -123,7 +123,7 @@ class Command(BaseCommand):
                 print(data_from_db)
                 print('----------')
 
-                update.message.reply_text(f'Игра {data_from_db["name"]} создана! Ссылка на игру: https://t.me/sssssssssannnttaaaa_bot?start={data_from_db["id"]}')
+                update.message.reply_text(f'Игра "{data_from_db["name"]}" создана! Ссылка на игру: https://t.me/assistant_peoples_bot?start={data_from_db["id"]}')
                 return ConversationHandler.END
             except Exception as e:
                 print(f"Error in create_game function: {e}")
